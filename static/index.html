@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sud Rathi | 100x AI Twin</title>
+    <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+    <style>
+        :root { --bg: #020617; --accent: #3b82f6; --error: #ef4444; }
+        body, html { height: 100%; margin: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; font-family: 'Inter', sans-serif; overflow: hidden; }
+
+        /* HIDE the default Vapi widget completely */
+        #vapi-support-sdk, .vapi-btn, iframe[title="Vapi Widget"] { 
+            display: none !important; visibility: hidden !important; pointer-events: none !important; 
+        }
+
+        .hero-container { text-align: center; }
+
+        #master-btn {
+            width: 140px; height: 140px; border-radius: 50%; border: none;
+            background: var(--accent); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        #master-btn svg { width: 60px; height: 60px; fill: white; }
+        #master-btn.active { background: var(--error); transform: scale(0.9); }
+
+        .pulse { animation: pulse-blue 2s infinite; }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 40px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0); }
+        }
+
+        .label { margin-top: 2rem; color: #94a3b8; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="hero-container">
+        <button id="master-btn" disabled>
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        </button>
+        <div class="label" id="status">Syncing 100x Link...</div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('master-btn');
+            const status = document.getElementById('status');
+            const pub = "REPLACE_WITH_PUBLIC_KEY"; 
+            const aid = "REPLACE_WITH_ASSISTANT_ID";
+
+            const checkSDK = setInterval(() => {
+                if (typeof window.vapiSDK !== 'undefined') {
+                    clearInterval(checkSDK);
+                    
+                    // Step 1: Initialize the widget invisibly on load
+                    window.vapiInstance = window.vapiSDK.run({
+                        apiKey: pub,
+                        assistant: aid,
+                        config: { 
+                            position: "bottom-right", // Hidden anyway
+                            showAutoStart: false 
+                        }
+                    });
+
+                    btn.disabled = false;
+                    btn.classList.add('pulse');
+                    status.innerText = "Ready for Session";
+
+                    btn.onclick = () => {
+                        if (!btn.classList.contains('active')) {
+                            // Step 2: Trigger the hidden call start
+                            const vapiBtn = document.querySelector('.vapi-btn');
+                            if (vapiBtn) vapiBtn.click();
+                            
+                            // If direct click fails, try the message approach
+                            window.postMessage({ type: 'vapi-start-call' }, '*');
+
+                            btn.classList.add('active');
+                            btn.classList.remove('pulse');
+                            status.innerText = "100x Connection Active";
+                        } else {
+                            location.reload(); 
+                        }
+                    };
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
