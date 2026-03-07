@@ -3,93 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sud Rathi | 100x AI Persona</title>
+    <title>Sud Rathi | AI Engineering</title>
     <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --bg: #020617; --accent: #3b82f6; --error: #ef4444; }
-        body, html { height: 100%; margin: 0; background: var(--bg); display: flex; justify-content: center; align-items: center; font-family: 'Inter', sans-serif; overflow: hidden; }
+        :root { --bg: #020617; --accent: #3b82f6; --error: #ef4444; --text-dim: #94a3b8; }
+        body, html { height: 100%; margin: 0; background: var(--bg); color: white; display: flex; justify-content: center; align-items: center; font-family: 'Inter', -apple-system, sans-serif; }
 
-        /* HIDE the default Vapi widget completely */
+        /* Hide Vapi Default Widget */
         #vapi-support-sdk, .vapi-btn, iframe[title="Vapi Widget"] { 
-            display: none !important; visibility: hidden !important; pointer-events: none !important; 
+            display: none !important; visibility: hidden !important; 
         }
 
-        .hero-container { text-align: center; }
+        .container { text-align: center; max-width: 400px; padding: 20px; transition: all 0.5s ease; }
+        
+        /* Branding Section */
+        .branding h1 { font-size: 1.5rem; letter-spacing: -0.02em; margin-bottom: 4px; }
+        .branding p { color: var(--accent); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2.5rem; }
 
+        /* The Button */
         #master-btn {
-            width: 140px; height: 140px; border-radius: 50%; border: none;
-            background: var(--accent); cursor: pointer;
+            width: 120px; height: 120px; border-radius: 50%; border: none;
+            background: var(--accent); cursor: pointer; position: relative;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+            margin: 0 auto;
+        }
+        #master-btn:disabled { background: #1e293b; cursor: not-allowed; box-shadow: none; }
+        #master-btn svg { width: 40px; height: 40px; fill: white; transition: transform 0.3s; }
+        
+        #master-btn.active svg { 
+            filter: drop-shadow(0 0 8px white);
+            animation: breath 3s ease-in-out infinite; 
+            transform: rotate(135deg);
+        }
+        #master-btn.connecting {
+            background: #f59e0b; 
+            transform: scale(0.95);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
         }
 
-        #master-btn svg { width: 60px; height: 60px; fill: white; }
-        #master-btn.active { background: var(--error); transform: scale(0.9); }
+        /* Speed up the pulse during dialing to show urgency */
+        .connecting-pulse {
+            animation: pulse-amber 1s infinite;
+        }
 
+        @keyframes pulse-amber {
+            0% { box-shadow: 0 0 0 0px rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(245, 158, 11, 0); }
+        }
+        /* Active State */
+        #master-btn.active { background: var(--error); transform: scale(0.9); box-shadow: 0 0 50px rgba(239, 68, 68, 0.4); }
+        #master-btn.active svg { transform: rotate(135deg); }
+
+        /* Pulse Animation */
         .pulse { animation: pulse-blue 2s infinite; }
         @keyframes pulse-blue {
             0% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 40px rgba(59, 130, 246, 0); }
+            70% { box-shadow: 0 0 0 30px rgba(59, 130, 246, 0); }
             100% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0); }
         }
 
-        .label { margin-top: 2rem; color: #94a3b8; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+        @keyframes breath {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .context-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.5); /* Subtle slate background */
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .instruction-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .step-icon {
+            font-size: 0.9rem;
+            filter: drop-shadow(0 0 5px var(--accent));
+        }
+
+        #status {
+            margin-top: 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+        }
+        .status-label { margin-top: 2rem; color: var(--text-dim); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
+        .hint { margin-top: 1rem; color: #475569; font-size: 0.8rem; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-    <div class="hero-container">
-        <button id="master-btn" disabled>
+    <div class="container" id="app-ui">
+        <div class="branding">
+            <h1>Sud Rathi</h1>
+            <p>AI Engineer // 100x.inc</p>
+        </div>
+
+        <button id="master-btn" disabled aria-label="Start call">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </button>
-        <div class="label" id="status">Syncing 100x Link...</div>
+
+        <div class="status-label" id="status">Establishing Secure Link...</div>
+
+        <div class="context-box" id="context-box">
+            <p class="hint">Click to discuss AI systems, 100x workflows, or to learn more about me.</p>
+            <div class="instruction-step">
+                <i data-lucide="mic" class="step-icon"></i>
+                <span>Ensure microphone access is allowed.</span>
+            </div>
+        </div>
     </div>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('master-btn');
-            const status = document.getElementById('status');
-            const pub = "REPLACE_WITH_PUBLIC_KEY"; 
-            const aid = "REPLACE_WITH_ASSISTANT_ID";
+<script>
+    const btn = document.getElementById('master-btn');
+    const status = document.getElementById('status');
+    const uiContainer = document.getElementById('app-ui');
+    
+    // Global reference to the SDK instance
+    window.vapiInstance = null;
+    let isCallActive = false;
+
+    let globalAssistantId = null;
+
+    async function initApp() {
+        try {
+            const response = await fetch('/api/config');
+            const config = await response.json();
+            globalAssistantId = config.assistantId;
+
+            const hour = new Date().getHours();
+            const timeContext = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 
             const checkSDK = setInterval(() => {
-                if (typeof window.vapiSDK !== 'undefined') {
+                if (window.vapiSDK) {
                     clearInterval(checkSDK);
                     
-                    // Step 1: Initialize the widget invisibly on load
                     window.vapiInstance = window.vapiSDK.run({
-                        apiKey: pub,
-                        assistant: aid,
-                        config: { 
-                            position: "bottom-right", // Hidden anyway
-                            showAutoStart: false 
+                        apiKey: config.publicKey,
+                        assistant: config.assistantId,
+                        config: { showAutoStart: false },
+                        assistantOverrides: {
+                            variableValues: {
+                                "deployment_env": "production-railway",
+                                "session_context": "technical_assessment",
+                                "local_time_greeting": timeContext
+                            }
                         }
+                    });
+                    
+                    window.vapiInstance.on('call-start', () => {
+                        isCallActive = true;
+                        btn.disabled = false;
+                        btn.classList.remove('connecting', 'connecting-pulse');
+                        btn.classList.add('active');
+                        status.innerText = "ON AIR";
+                    });
+
+                    window.vapiInstance.on('call-end', () => {
+                        isCallActive = false;
+                        btn.classList.remove('active', 'connecting', 'connecting-pulse');
+                        handleEndTransition();
+                    });
+
+                    window.vapiInstance.on('error', (e) => {
+                        if (e.message && e.message.includes('ended')) return;
+                        btn.disabled = false;
+                        btn.classList.remove('connecting', 'connecting-pulse');
+                        btn.classList.add('pulse');
+                        status.innerText = "Retry Connection";
                     });
 
                     btn.disabled = false;
                     btn.classList.add('pulse');
                     status.innerText = "Ready for Session";
-
-                    btn.onclick = () => {
-                        if (!btn.classList.contains('active')) {
-                            // Step 2: Trigger the hidden call start
-                            const vapiBtn = document.querySelector('.vapi-btn');
-                            if (vapiBtn) vapiBtn.click();
-                            
-                            // If direct click fails, try the message approach
-                            window.postMessage({ type: 'vapi-start-call' }, '*');
-
-                            btn.classList.add('active');
-                            btn.classList.remove('pulse');
-                            status.innerText = "100x Connection Active";
-                        } else {
-                            location.reload(); 
-                        }
-                    };
                 }
             }, 500);
-        });
-    </script>
+        } catch (err) {
+            console.error("Init Error:", err);
+            status.innerText = "System Offline";
+        }
+    }
+
+    btn.onclick = () => {
+        if (!window.vapiInstance) return;
+
+        if (!isCallActive) {
+                    console.log("UI: Transitioning to Dialing...");
+                    
+                    btn.classList.remove('pulse');
+                    btn.classList.add('connecting', 'connecting-pulse');
+                    status.innerText = "Dialing Sud...";
+                    btn.disabled = true;
+
+                    window.vapiInstance.start(globalAssistantId);
+                } else {
+                    window.vapiInstance.stop();
+                }
+    };
+
+    function handleEndTransition() {
+        uiContainer.style.opacity = '0';
+        setTimeout(() => {
+            uiContainer.innerHTML = `
+                <div class="branding">
+                    <h2 style="color:white;">Session Ended</h2>
+                    <p style="color:var(--text-dim); margin-top:10px;">Discussion archived. Talk soon.</p>
+                    <button onclick="location.reload()" style="background:var(--accent); border:none; color:white; padding:10px 24px; border-radius:20px; margin-top:20px; cursor:pointer; font-weight:600;">Restart Session</button>
+                </div>
+            `;
+            uiContainer.style.opacity = '1';
+        }, 500);
+    }
+    lucide.createIcons()
+    initApp();
+</script>
 </body>
 </html>
