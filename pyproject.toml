@@ -1,0 +1,21 @@
+[project]
+name = "ai-voice-bot"
+version = "1.0.0"
+description = "Personal AI voice bot powered by Vapi — lets visitors have a voice conversation with an AI assistant personalized as Sud Rathi."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.135.1",
+    "python-dotenv>=1.2.2",
+    "uvicorn>=0.41.0",
+    "vapi-server-sdk>=1.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.28.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

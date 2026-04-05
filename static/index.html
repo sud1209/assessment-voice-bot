@@ -104,6 +104,32 @@
         }
         .status-label { margin-top: 2rem; color: var(--text-dim); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
         .hint { margin-top: 1rem; color: #475569; font-size: 0.8rem; line-height: 1.5; }
+
+        /* How it works strip */
+        .how-it-works {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+        }
+        .how-it-works .step { display: flex; align-items: center; gap: 0.35rem; }
+        .how-it-works .arrow { color: #334155; }
+
+        /* Session counter */
+        #session-counter {
+            display: none;
+            margin-top: 0.75rem;
+            font-size: 0.68rem;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -127,17 +153,27 @@
                 <span>Ensure microphone access is allowed.</span>
             </div>
         </div>
+
+        <div class="how-it-works">
+            <span class="step">🎙 Click the button</span>
+            <span class="arrow">→</span>
+            <span class="step">💬 Speak naturally</span>
+            <span class="arrow">→</span>
+            <span class="step">🤖 AI responds in real time</span>
+        </div>
+
+        <div id="session-counter"></div>
     </div>
 
 <script>
     const btn = document.getElementById('master-btn');
     const status = document.getElementById('status');
     const uiContainer = document.getElementById('app-ui');
-    
-    // Global reference to the SDK instance
+    const sessionCounter = document.getElementById('session-counter');
+
     window.vapiInstance = null;
     let isCallActive = false;
-
+    let sessionCalls = 0;
     let globalAssistantId = null;
 
     async function initApp() {
@@ -159,7 +195,7 @@
                         config: { showAutoStart: false },
                         assistantOverrides: {
                             variableValues: {
-                                "deployment_env": "production-railway",
+                                "deployment_env": "production",
                                 "session_context": "technical_assessment",
                                 "local_time_greeting": timeContext
                             }
@@ -176,7 +212,10 @@
 
                     window.vapiInstance.on('call-end', () => {
                         isCallActive = false;
+                        sessionCalls++;
                         btn.classList.remove('active', 'connecting', 'connecting-pulse');
+                        sessionCounter.style.display = 'block';
+                        sessionCounter.innerText = `${sessionCalls} conversation${sessionCalls > 1 ? 's' : ''} this session`;
                         handleEndTransition();
                     });
 

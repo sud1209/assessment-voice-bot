@@ -1,25 +1,66 @@
 import os
+import json
 import logging
 import time
-from fastapi import FastAPI, HTTPException, Request
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("sud-voice-bot")
-
 load_dotenv()
-app = FastAPI(title="Sud Rathi AI Voice Bot Server")
 
+# --- Structured JSON Logging ---
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        base = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+        }
+        msg = record.getMessage()
+        try:
+            parsed = json.loads(msg)
+            if isinstance(parsed, dict):
+                base.update(parsed)
+                return json.dumps(base)
+        except (json.JSONDecodeError, TypeError):
+            pass
+        base["message"] = msg
+        return json.dumps(base)
+
+handler = logging.StreamHandler()
+handler.setFormatter(JsonFormatter())
+logger = logging.getLogger("sud-voice-bot")
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
+logger.propagate = False
+
+# --- Startup Validation ---
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if not os.getenv("VAPI_PUBLIC_KEY") or not os.getenv("ASSISTANT_ID"):
+        raise RuntimeError(
+            "Missing required environment variables: VAPI_PUBLIC_KEY, ASSISTANT_ID. "
+            "Copy .env.example to .env and fill in your Vapi credentials."
+        )
+    logger.info("Configuration validated. Server ready.")
+    yield
+
+app = FastAPI(title="Sud Rathi AI Voice Bot Server", lifespan=lifespan)
+
+# --- Request Logging Middleware ---
 @app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
+async def log_requests(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
-    process_time = time.time() - start_time
-    logger.info(f"Path: {request.url.path} | Latency: {process_time:.4f}s")
+    latency_ms = round((time.time() - start_time) * 1000, 2)
+    logger.info(json.dumps({
+        "path": request.url.path,
+        "method": request.method,
+        "status_code": response.status_code,
+        "latency_ms": latency_ms,
+    }))
     return response
-
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 static_dir = os.path.join(current_dir, "static")
@@ -29,31 +70,26 @@ if os.path.exists(static_dir):
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "sud-voice-bot", "version": "1.0.0"}
+    return {
+        "status": "ok",
+        "config_loaded": True,
+        "version": "1.0.0",
+    }
 
 @app.get("/api/config")
 async def get_config():
-    pub_key = os.getenv("VAPI_PUBLIC_KEY")
-    ast_id = os.getenv("ASSISTANT_ID")
-    
-    if not pub_key or not ast_id:
-        logger.error("Configuration keys missing in environment variables")
-        raise HTTPException(status_code=500, detail="Server configuration error")
-        
-    logger.info("Session configuration requested and served")
+    logger.info("Config requested")
     return {
-        "publicKey": pub_key,
-        "assistantId": ast_id
+        "publicKey": os.getenv("VAPI_PUBLIC_KEY"),
+        "assistantId": os.getenv("ASSISTANT_ID"),
     }
 
 @app.get("/", response_class=HTMLResponse)
 async def read_index():
     file_path = os.path.join(static_dir, "index.html")
-    
     if not os.path.exists(file_path):
         logger.critical(f"Index file missing at {file_path}")
         return HTMLResponse(content="<h1>System Offline</h1>", status_code=500)
-
     with open(file_path, "r") as f:
         return f.read()
 
