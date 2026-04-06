@@ -1,11 +1,11 @@
-# AI Voice Bot
+# AI Voice Interview Bot
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.135-009688?logo=fastapi&logoColor=white)
 ![Vapi AI](https://img.shields.io/badge/Vapi_AI-Voice_SDK-6366f1)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A personal AI voice bot that lets visitors have a real-time voice conversation with an AI assistant. Built as a portfolio project — click a button, speak naturally, and the AI responds as me.
+A fun experiment: an AI-powered introduction bot you can actually talk to. Visitors click a button and interview me out loud — ask about my work, projects, opinions on AI, whatever. The assistant answers as me in real time.
 
 > **Screenshot:** *(drop a screenshot of the UI here)*
 
@@ -13,9 +13,9 @@ A personal AI voice bot that lets visitors have a real-time voice conversation w
 
 ## What it does
 
-Visitors land on a minimal dark-themed page with a single call button. Clicking it requests microphone access and initiates a voice session via [Vapi AI](https://vapi.ai), which handles speech-to-text, the LLM conversation, and text-to-speech in the cloud. The assistant is configured with context about me (role, company, interests) so it can answer questions about my work and background.
+Instead of reading a static bio or portfolio, visitors can have a live voice conversation with an AI trained on context about me. Ask it anything you'd ask in a first conversation — what I'm working on, how I think about AI engineering, what 100x.inc does. It responds naturally, in real time.
 
-The FastAPI backend serves the frontend and exposes a `/api/config` endpoint that securely passes Vapi credentials to the browser without embedding them in the HTML.
+Under the hood: a minimal FastAPI backend serves the frontend and exposes a `/api/config` endpoint that securely passes Vapi credentials to the browser. [Vapi AI](https://vapi.ai) handles all the voice processing (STT → LLM → TTS) in the cloud — the server never touches audio.
 
 ---
 
@@ -43,7 +43,7 @@ The server never touches audio — all voice processing happens in Vapi's cloud.
 
 ```bash
 # 1. Clone
-git clone https://github.com/sud1209/ai-voice-bot.git
+git clone https://github.com/sud1209/assessment-voice-bot.git
 cd ai-voice-bot
 
 # 2. Set up environment variables
