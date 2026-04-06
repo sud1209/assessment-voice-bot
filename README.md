@@ -7,7 +7,7 @@
 
 A fun experiment: an AI-powered introduction bot you can actually talk to. Visitors click a button and interview me out loud — ask about my work, projects, opinions on AI, whatever. The assistant answers as me in real time.
 
-> **Screenshot:** *(drop a screenshot of the UI here)*
+![UI Screenshot](static/screenshot.png)
 
 ---
 
